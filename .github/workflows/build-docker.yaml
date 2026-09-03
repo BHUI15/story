@@ -22,13 +22,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build the Docker image and push to Docker Hub
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/flask-api-app:latest
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -36,10 +29,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to AWS ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ecs-task-definition.json
-          service: flask-third-api-service
-          cluster: flask-third-api-cluster
-          wait-for-service-stability: true
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-flask-third-api:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-flask-third-api:latest
+
+      - name: Push Docker image to Amazon ECR
+        run: |
+          aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}
+          aws_region=${{ secrets.AWS_REGION }}
+          ecr_repository_name=my-flask-third-api
+          docker tag ${{ secrets.DOCKER_USERNAME }}/my-flask-third-api:latest $aws_account_id.dkr.ecr.$aws_region.amazonaws.com/$ecr_repository_name:latest
+          docker push $aws_account_id.dkr.ecr.$aws_region.amazonaws.com/$ecr_repository_name:latest
