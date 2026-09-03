@@ -8,9 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# expose the port that the container 
-EXPOSE 8080
+# expose the port that the container will listen on
+EXPOSE 80
 
 ENV FLASK_APP=main.py
 
-CMD ["python", "main.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "--workers", "3", "--timeout", "120", "main:app"]

@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Welcome to the prediction API!"
+    return "Welcome to the Flask API. This API is running on Flask. You can use the /status endpoint to check if the API is running, and the /predict endpoint to get predictions from a dummy model."
 
 @app.route('/status', methods=['GET'])
 def status():
@@ -25,4 +25,4 @@ def greet():
     return jsonify({"message": f"Hello, {name}!"})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=80)
